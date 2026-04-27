@@ -1,224 +1,154 @@
 # ClickUp MCP Server
 
-A Model Context Protocol (MCP) server for ClickUp task management. This server allows you to log tasks, assign them to yourself, and get formatted updates through Claude or other MCP-compatible clients.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![MCP](https://img.shields.io/badge/MCP-compatible-blue)](https://modelcontextprotocol.io)
+
+A Model Context Protocol (MCP) server for ClickUp. Manage tasks, track time, change status, and post daily standup updates to ClickUp Chat — all from **Claude Code, Cursor, Claude Desktop, or any MCP-compatible AI tool**.
+
+> Tell your AI: *"Create Test task in AI Role Play, log 2 hours, mark delivered, and post my daily update to the channel"* → done in seconds, no context-switching.
 
 ## Features
 
-- 📝 **Log Tasks**: Create new tasks in ClickUp with automatic assignment
-- 📊 **Get Updates**: Retrieve formatted task updates in a consistent format
-- ✅ **Update Status**: Change task status programmatically
-- 🔍 **Find Tasks**: Search for tasks by name
-- ⚙️ **Flexible Configuration**: Support for multiple spaces and lists
+- **Log tasks** — auto-assigns to you, finds the right space/list (including lists inside Sprint folders)
+- **Track real time** — log actual hours spent (not just estimates) as a real time entry
+- **Update status** — Open → In Progress → Delivered with one line
+- **Discover** — list spaces, folders, lists, and chat channels in your workspace
+- **Daily standup updates** — formatted message to any ClickUp Chat channel:
+  - Done Today (with task links + time spent)
+  - Planned for Tomorrow
+  - AI Usage
+  - Challenges / Blockers
 
-## Prerequisites
-
-- Node.js 18 or higher
-- ClickUp API key
-- ClickUp account with access to a workspace
-
-## Installation
-
-1. Clone or navigate to this directory:
-```bash
-cd clickup-mcp
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Build the TypeScript code:
-```bash
-npm run build
-```
-
-## Configuration
+## Setup
 
 ### 1. Get Your ClickUp API Key
 
-1. Go to ClickUp Settings → Apps
-2. Click "Generate" under API Token
-3. Copy your API key
+1. ClickUp → Settings → Apps
+2. Click **Generate** under API Token
+3. Copy the `pk_...` key — you'll need it below
 
-### 2. Create Environment File
-
-Create a `.env` file in the project root:
+### 2. Install the Server
 
 ```bash
-cp .env.example .env
+git clone git@github.com:arslan8122/clickup-mcp.git
+cd clickup-mcp
+npm install
+npm run build
 ```
 
-Edit `.env` with your API key:
+That's it for installation — **no `.env` file needed for normal use**. You'll pass your API key directly to your AI client below.
 
-```env
-CLICKUP_API_KEY=pk_your_api_key_here
+### 3. Connect to Your AI Client
+
+Pick the section that matches your tool. The API key is passed as an **environment variable** by the client when it launches the server.
+
+#### Claude Code
+
+```bash
+claude mcp add clickup -s user \
+  -e CLICKUP_API_KEY=pk_your_key_here \
+  -- node /absolute/path/to/clickup-mcp/dist/index.js
 ```
 
-**That's it!** The server will automatically:
-- Detect your User ID from the API key
-- Detect your Team ID from your ClickUp account
-- Assign tasks to you automatically
+Restart Claude Code, then run `/mcp` to confirm it's connected.
 
-**Optional**: If you have multiple teams or want to override the auto-detection, you can manually specify:
-```env
-CLICKUP_TEAM_ID=your_team_id
-CLICKUP_USER_ID=your_user_id
-```
+#### Claude Desktop
 
-## Usage with Claude Desktop
-
-### 1. Configure Claude Desktop
-
-Add this to your Claude Desktop config file:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%/Claude/claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "clickup": {
       "command": "node",
-      "args": ["/Users/arslan/datics/clickup-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/clickup-mcp/dist/index.js"],
       "env": {
-        "CLICKUP_API_KEY": "pk_your_api_key_here"
+        "CLICKUP_API_KEY": "pk_your_key_here"
       }
     }
   }
 }
 ```
 
-**Note**: User ID and Team ID are auto-detected from your API key!
+Restart Claude Desktop.
 
-### 2. Restart Claude Desktop
+#### Cursor / Other MCP Clients
 
-After updating the config, restart Claude Desktop to load the MCP server.
+Same JSON shape as Claude Desktop, in the client's MCP config file. The two things you always need: a `command` + `args` pointing at `dist/index.js`, and `env.CLICKUP_API_KEY`.
 
-### 3. Use the Tools
+### Environment Variables
 
-You can now ask Claude to:
+| Variable | Required | Description |
+|---|---|---|
+| `CLICKUP_API_KEY` | ✅ | Your ClickUp personal API token (starts with `pk_`) |
+| `CLICKUP_TEAM_ID` | ❌ | Workspace/team ID. Auto-detected from your API key. |
+| `CLICKUP_USER_ID` | ❌ | Your user ID. Auto-detected from your API key. |
 
-- **Log a task**: "Log a task called 'Fix bug in authentication' to the 'Development' space in ClickUp"
-- **Get updates**: "Get the update for ClickUp task abc123"
-- **Update status**: "Update task abc123 status to 'In Progress'"
+Override `CLICKUP_TEAM_ID` / `CLICKUP_USER_ID` only if you belong to multiple workspaces and the auto-detected one is wrong.
+
+### Using `.env` (development only)
+
+If you're **developing or testing** the server directly (e.g. `npm run start` from the cloned repo), you can put your key in a `.env` file instead:
+
+```bash
+cp .env.example .env
+# Edit .env, add CLICKUP_API_KEY=pk_...
+npm run start
+```
+
+This is a dev convenience — **end users using Claude Code / Cursor / etc. should not need a `.env` file**. The API key flows through the client's MCP config.
 
 ## Available Tools
 
-### 1. `log_task`
+### Task Management
+- `log_task` — Create a task in a space/list, auto-assign to you
+- `update_task_status` — Change a task's status
+- `get_task_update` — Get a formatted task summary
+- `find_task` — Search task by name (basic)
+- `track_time` — Log actual time spent on a task (e.g. `"2h"`, `"30m"`, `"1h 30m"`)
 
-Create a new task in ClickUp and assign it to you.
+### Discovery
+- `list_spaces` — List all spaces in your workspace
+- `list_folders` — List folders in a space
+- `list_lists` — List all lists in a space (including those inside folders/sprint folders)
+- `list_chat_channels` — List all accessible ClickUp Chat channels
 
-**Parameters**:
-- `taskName` (required): The name of the task
-- `spaceName` (required): The ClickUp space name where the task will be created
-- `listName` (optional): The list name within the space (uses first list if not specified)
-- `description` (optional): Task description
-- `priority` (optional): 1=Urgent, 2=High, 3=Normal, 4=Low
-- `dueDate` (optional): Due date in ISO format
-- `timeEstimate` (optional): Time estimate in milliseconds
+### ClickUp Chat
+- `send_chat_message` — Post a free-form markdown message to any channel
+- `send_task_update_to_chat` — Post a single task's status line to a channel
+- `send_daily_update_to_chat` — Post a structured 4-section daily standup (Done Today / Planned Tomorrow / AI Usage / Blockers)
 
-**Examples**:
+## Example: Full Daily Workflow
+
+In one prompt to your AI:
+
 ```
-Log a task called "Implement user authentication" in space "Development"
-```
-
-```
-Log a task called "Fix login bug" in space "Development" list "Bug Fixes" with high priority
-```
-
-### 2. `get_task_update`
-
-Get formatted update for a task.
-
-**Parameters**:
-- `taskId` (required): The ClickUp task ID
-
-**Example**:
-```
-Get the update for task abc123xyz
+Create "Fix login bug" in AI Role Play Assistant, log 2h on it,
+mark it delivered, then post my daily update to AI Role Play
+Assistant - Mike's Project channel.
 ```
 
-**Output Format**:
-```
-[Task Name](https://app.clickup.com/t/abc123xyz) — In Progress — 2h 30m
-```
+The MCP will run: `log_task` → `track_time` → `update_task_status` → `send_daily_update_to_chat`.
 
-The format is: `[Task Name](url) — Status — Time Spent`
+## Roadmap / Limitations
 
-### 3. `update_task_status`
+- **No inline task pills in chat:** ClickUp's public v3 Chat API only supports markdown — true rich task pills (with status badges) require their internal API. The `send_daily_update_to_chat` tool bakes the status into the link text as `[Task [DELIVERED]](url)` as a workaround.
+- **`find_task` is basic** — full search across the workspace via the v2 search API is on the roadmap.
 
-Update the status of a task.
+## Contributing
 
-**Parameters**:
-- `taskId` (required): The ClickUp task ID
-- `status` (required): New status name
+PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, branching conventions, and how to add a new MCP tool.
 
-**Example**:
-```
-Update task abc123xyz status to "Completed"
-```
-
-### 4. `find_task`
-
-Find a task by name (currently returns task ID requirement message).
-
-**Parameters**:
-- `taskName` (required): Name of the task to search for
-- `spaceName` (optional): Space name to search in
-
-## Development
-
-### Watch Mode
-
-For development, you can run TypeScript in watch mode:
+Quick:
 
 ```bash
-npm run watch
+git clone git@github.com:arslan8122/clickup-mcp.git
+cd clickup-mcp && npm install && npm run build
 ```
 
-### Testing
-
-You can test the MCP server using the MCP Inspector or by running it directly:
-
-```bash
-node dist/index.js
-```
-
-## Task Update Format
-
-Tasks are formatted as shown in your screenshot:
-
-```
-📋 **Task Name**
-Status: Status Name
-Assignees: username1, username2
-Time Spent: Xh Ym
-Due Date: MM/DD/YYYY
-🔗 https://app.clickup.com/t/task_id
-```
-
-## Troubleshooting
-
-### Server Not Appearing in Claude
-
-1. Check that the config file path is correct
-2. Verify the `dist/index.js` file exists (run `npm run build`)
-3. Check Claude Desktop logs for errors
-4. Restart Claude Desktop
-
-### API Key Issues
-
-- Ensure your API key starts with `pk_`
-- Verify the key has not been revoked in ClickUp settings
-- Check that your user has access to the workspace
-
-### List/Space Not Found
-
-- Double-check your list ID or space name
-- Ensure your API key has access to that workspace
-- Verify the team ID is correct
+Open issues or feature requests at https://github.com/arslan8122/clickup-mcp/issues.
 
 ## License
 
-MIT
+[MIT](LICENSE) © Arslan Asghar
