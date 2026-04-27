@@ -30,6 +30,26 @@ A Model Context Protocol (MCP) server for ClickUp. Manage tasks, track time, cha
 
 ### 2. Install the Server
 
+**Recommended — install globally (works from anywhere on your system):**
+
+```bash
+npm install -g clickup-task-mcp
+```
+
+After install, the `clickup-task-mcp` command is available system-wide. Verify:
+
+```bash
+which clickup-task-mcp     # should print a path
+clickup-task-mcp --help    # (or just runs the server on stdio)
+```
+
+To upgrade later:
+```bash
+npm update -g clickup-task-mcp
+```
+
+**Alternative — build from source (for contributors):**
+
 ```bash
 git clone git@github.com:arslan8122/clickup-mcp.git
 cd clickup-mcp
@@ -37,7 +57,7 @@ npm install
 npm run build
 ```
 
-That's it for installation — **no `.env` file needed for normal use**. You'll pass your API key directly to your AI client below.
+**No `.env` file needed for normal use.** You'll pass your API key directly to your AI client below.
 
 ### 3. Connect to Your AI Client
 
@@ -45,10 +65,14 @@ Pick the section that matches your tool. The API key is passed as an **environme
 
 #### Claude Code
 
+After global install:
 ```bash
-claude mcp add clickup -s user \
-  -e CLICKUP_API_KEY=pk_your_key_here \
-  -- node /absolute/path/to/clickup-mcp/dist/index.js
+claude mcp add clickup -s user -e CLICKUP_API_KEY=pk_your_key_here -- clickup-task-mcp
+```
+
+If built from source:
+```bash
+claude mcp add clickup -s user -e CLICKUP_API_KEY=pk_your_key_here -- node /absolute/path/to/clickup-mcp/dist/index.js
 ```
 
 Restart Claude Code, then run `/mcp` to confirm it's connected.
@@ -57,6 +81,20 @@ Restart Claude Code, then run `/mcp` to confirm it's connected.
 
 Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%/Claude/claude_desktop_config.json` (Windows):
 
+```json
+{
+  "mcpServers": {
+    "clickup": {
+      "command": "clickup-task-mcp",
+      "env": {
+        "CLICKUP_API_KEY": "pk_your_key_here"
+      }
+    }
+  }
+}
+```
+
+Or if built from source, use:
 ```json
 {
   "mcpServers": {
@@ -75,7 +113,7 @@ Restart Claude Desktop.
 
 #### Cursor / Other MCP Clients
 
-Same JSON shape as Claude Desktop, in the client's MCP config file. The two things you always need: a `command` + `args` pointing at `dist/index.js`, and `env.CLICKUP_API_KEY`.
+Same JSON shape as Claude Desktop, in the client's MCP config file. After a global install, the `command` is just `clickup-task-mcp` with no `args` needed.
 
 ### Environment Variables
 

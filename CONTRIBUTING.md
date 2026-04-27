@@ -35,9 +35,7 @@ npm run watch
 To test changes against a local Claude Code install:
 
 ```bash
-claude mcp add clickup-dev -s user \
-  -e CLICKUP_API_KEY=pk_your_key \
-  -- node /absolute/path/to/clickup-mcp/dist/index.js
+claude mcp add clickup-dev -s user -e CLICKUP_API_KEY=pk_your_key -- node /absolute/path/to/clickup-mcp/dist/index.js
 ```
 
 Then restart Claude Code.

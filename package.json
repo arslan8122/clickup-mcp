@@ -1,11 +1,11 @@
 {
-  "name": "clickup-mcp",
+  "name": "clickup-task-mcp",
   "version": "1.0.0",
   "description": "Model Context Protocol (MCP) server for ClickUp — manage tasks, track time, and post daily updates from Claude Code, Cursor, or any MCP-compatible AI tool.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "clickup-mcp": "dist/index.js"
+    "clickup-task-mcp": "dist/index.js"
   },
   "files": [
     "dist",
@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
+    "clickup-task-mcp": "^1.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
