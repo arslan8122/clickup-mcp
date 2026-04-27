@@ -1,6 +1,6 @@
 {
   "name": "clickup-task-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Model Context Protocol (MCP) server for ClickUp — manage tasks, track time, and post daily updates from Claude Code, Cursor, or any MCP-compatible AI tool.",
   "type": "module",
   "main": "dist/index.js",
