@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ClickUp Daily Update — Settings</title>
+    <style>
+      body { font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 520px; margin: 32px auto; padding: 0 16px; color: #1d1d1f; }
+      h1 { font-size: 18px; }
+      label { display: block; margin: 16px 0 4px; font-weight: 600; }
+      input, select { width: 100%; padding: 8px; border: 1px solid #e5e5ea; border-radius: 6px; font-size: 13px; background: white; }
+      .hint { font-size: 12px; color: #6e6e73; margin-top: 4px; }
+      button { margin-top: 20px; background: #7b68ee; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+      button:hover { filter: brightness(1.05); }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .status { margin-top: 12px; font-size: 13px; }
+      .ok { color: #248a3d; }
+      .err { color: #d70015; }
+      .info { color: #6e6e73; }
+      .warn { background: #fff8e1; border: 1px solid #ffd54f; padding: 10px 12px; border-radius: 6px; font-size: 12px; margin-top: 16px; }
+      #teamGroup { display: none; }
+      #teamGroup.show { display: block; }
+    </style>
+  </head>
+  <body>
+    <h1>ClickUp Daily Update</h1>
+
+    <label for="apiKey">ClickUp Personal API Token</label>
+    <input id="apiKey" type="password" placeholder="pk_..." autocomplete="off" />
+    <div class="hint">Get one at: ClickUp → Avatar → Settings → Apps → Generate. Use a dedicated token, not your master one.</div>
+
+    <div id="teamGroup">
+      <label for="teamId">Workspace</label>
+      <select id="teamId"></select>
+      <div class="hint">Auto-detected from your token. If you have multiple workspaces, pick one.</div>
+    </div>
+
+    <button id="save">Save</button>
+    <span id="status" class="status"></span>
+
+    <div class="warn">
+      <b>Note:</b> Your token is stored in <code>chrome.storage.local</code>, which is unencrypted. Only install this extension on a trusted machine.
+    </div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

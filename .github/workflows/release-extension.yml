@@ -1,0 +1,60 @@
+name: Release Chrome extension
+
+on:
+  push:
+    tags:
+      - "ext-v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Read manifest version
+        id: manifest
+        run: |
+          version=$(node -p "require('./extension/manifest.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches manifest version
+        run: |
+          tag="${GITHUB_REF#refs/tags/ext-v}"
+          manifest="${{ steps.manifest.outputs.version }}"
+          if [ "$tag" != "$manifest" ]; then
+            echo "::error::Tag ext-v$tag does not match extension/manifest.json version $manifest"
+            exit 1
+          fi
+
+      - name: Build & package extension
+        run: npm run package:extension
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Chrome extension v${{ steps.manifest.outputs.version }}"
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## Install
+
+            1. Download `clickup-daily-update-extension-${{ steps.manifest.outputs.version }}.zip` below
+            2. Unzip it
+            3. Open `chrome://extensions` in Chrome
+            4. Enable **Developer mode** (top-right)
+            5. Click **Load unpacked** → select the unzipped folder
+            6. Right-click the extension icon → **Options** → paste your ClickUp API token
+
+            See the [extension README](https://github.com/${{ github.repository }}/blob/main/extension/README.md) for full setup.
+          files: release/clickup-daily-update-extension-*.zip
+          fail_on_unmatched_files: true

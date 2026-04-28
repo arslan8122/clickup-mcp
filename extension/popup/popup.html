@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ClickUp Daily Update</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1>Daily Update</h1>
+      <button id="refresh" class="icon-btn" title="Refresh">↻</button>
+    </header>
+
+    <section class="controls">
+      <label class="field">
+        <span>Date</span>
+        <input type="date" id="date" />
+      </label>
+      <label class="field">
+        <span>Space</span>
+        <select id="space" disabled>
+          <option value="">Loading…</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="block" id="done-block">
+      <h2>1. Done Today</h2>
+      <ul id="done-list" class="task-list">
+        <li class="empty">Pick a space to see tasks.</li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>2. Planned for Tomorrow</h2>
+      <textarea id="planned" placeholder="One bullet per line"></textarea>
+    </section>
+
+    <section class="block">
+      <h2>3. AI Usage</h2>
+      <textarea id="ai-usage" placeholder="What you used AI for today"></textarea>
+    </section>
+
+    <section class="block">
+      <h2>4. Challenges / Blockers</h2>
+      <textarea id="blockers" placeholder="None at the moment."></textarea>
+    </section>
+
+    <footer class="footer">
+      <span id="status" class="status"></span>
+      <button id="copy" class="primary">Copy</button>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

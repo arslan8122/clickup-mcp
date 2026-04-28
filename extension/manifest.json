@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "ClickUp Daily Update",
+  "version": "0.1.0",
+  "description": "Generate a ClickUp-formatted daily standup from your time entries. Pick a space, copy, paste into ClickUp Chat.",
+  "permissions": ["storage", "clipboardWrite"],
+  "host_permissions": ["https://api.clickup.com/*"],
+  "action": {
+    "default_title": "ClickUp Daily Update",
+    "default_popup": "popup/popup.html"
+  },
+  "options_page": "options/options.html"
+}

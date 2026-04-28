@@ -17,6 +17,9 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "start": "node dist/index.js",
+    "build:extension": "tsc -p extension/tsconfig.json",
+    "watch:extension": "tsc -p extension/tsconfig.json --watch",
+    "package:extension": "npm run build:extension && node scripts/package-extension.mjs",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -51,6 +54,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.287",
     "@types/node": "^22.10.5",
     "typescript": "^5.7.3"
   }

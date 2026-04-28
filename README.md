@@ -8,6 +8,12 @@ A Model Context Protocol (MCP) server for ClickUp. Manage tasks, track time, cha
 
 > Tell your AI: *"Create Test task in AI Role Play, log 2 hours, mark delivered, and post my daily update to the channel"* → done in seconds, no context-switching.
 
+## Companion Chrome extension
+
+This repo also ships a **Chrome extension** that builds the same daily standup format from your tracked time, no AI needed. Pick a date and folder, hit Copy, paste into ClickUp Chat.
+
+→ [extension/README.md](extension/README.md) for install + usage. Pre-built zips are on the [Releases](https://github.com/arslan8122/clickup-mcp/releases) page.
+
 ## Features
 
 - **Log tasks** — auto-assigns to you, finds the right space/list (including lists inside Sprint folders)
