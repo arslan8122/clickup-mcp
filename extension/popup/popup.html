@@ -2,54 +2,110 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>ClickUp Daily Update</title>
+    <title>ClickUp Tools</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <header class="header">
-      <h1>Daily Update</h1>
+      <h1>ClickUp Tools</h1>
       <button id="refresh" class="icon-btn" title="Refresh">↻</button>
     </header>
 
-    <section class="controls">
-      <label class="field">
-        <span>Date</span>
-        <input type="date" id="date" />
-      </label>
-      <label class="field">
-        <span>Space</span>
-        <select id="space" disabled>
-          <option value="">Loading…</option>
-        </select>
-      </label>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="daily" role="tab">Daily Update</button>
+      <button class="tab" data-tab="utilization" role="tab">Resource Utilization</button>
+    </nav>
+
+    <!-- ============= TAB: DAILY UPDATE ============= -->
+    <section class="tab-panel active" data-panel="daily">
+      <section class="controls">
+        <label class="field">
+          <span>Date</span>
+          <input type="date" id="date" />
+        </label>
+        <label class="field">
+          <span>Space</span>
+          <select id="space" disabled>
+            <option value="">Loading…</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="block" id="done-block">
+        <h2>1. Done Today</h2>
+        <ul id="done-list" class="task-list">
+          <li class="empty">Pick a space to see tasks.</li>
+        </ul>
+      </section>
+
+      <section class="block">
+        <h2>2. Planned for Tomorrow</h2>
+        <textarea id="planned" placeholder="One bullet per line"></textarea>
+      </section>
+
+      <section class="block">
+        <h2>3. AI Usage</h2>
+        <textarea id="ai-usage" placeholder="What you used AI for today"></textarea>
+      </section>
+
+      <section class="block">
+        <h2>4. Challenges / Blockers</h2>
+        <textarea id="blockers" placeholder="None at the moment."></textarea>
+      </section>
+
+      <footer class="footer">
+        <span id="status" class="status"></span>
+        <button id="copy" class="primary">Copy</button>
+      </footer>
     </section>
 
-    <section class="block" id="done-block">
-      <h2>1. Done Today</h2>
-      <ul id="done-list" class="task-list">
-        <li class="empty">Pick a space to see tasks.</li>
-      </ul>
-    </section>
+    <!-- ============= TAB: RESOURCE UTILIZATION ============= -->
+    <section class="tab-panel" data-panel="utilization">
+      <section class="controls">
+        <label class="field">
+          <span>Start</span>
+          <input type="date" id="util-start" />
+        </label>
+        <label class="field">
+          <span>End</span>
+          <input type="date" id="util-end" />
+        </label>
+      </section>
 
-    <section class="block">
-      <h2>2. Planned for Tomorrow</h2>
-      <textarea id="planned" placeholder="One bullet per line"></textarea>
-    </section>
+      <section class="block">
+        <h2>User</h2>
+        <div id="util-members" class="member-list">
+          <div class="empty">Loading user…</div>
+        </div>
+      </section>
 
-    <section class="block">
-      <h2>3. AI Usage</h2>
-      <textarea id="ai-usage" placeholder="What you used AI for today"></textarea>
-    </section>
+      <section class="block">
+        <h2>Preview</h2>
+        <div id="util-preview-wrap" class="util-preview-wrap">
+          <table id="util-table" class="util-table">
+            <thead>
+              <tr>
+                <th>Name of the Resource</th>
+                <th>Project Name</th>
+                <th>Utilization</th>
+                <th>Total Current Utilization</th>
+                <th>Forecast (1-2 weeks)</th>
+                <th>Remarks/Comments</th>
+              </tr>
+            </thead>
+            <tbody id="util-tbody">
+              <tr class="empty"><td colspan="6">Pick a date range and load.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-    <section class="block">
-      <h2>4. Challenges / Blockers</h2>
-      <textarea id="blockers" placeholder="None at the moment."></textarea>
+      <footer class="footer">
+        <span id="util-status" class="status"></span>
+        <button id="util-load" class="secondary" type="button">Load</button>
+        <button id="util-copy" class="primary" type="button" disabled>Copy for Sheets</button>
+      </footer>
     </section>
-
-    <footer class="footer">
-      <span id="status" class="status"></span>
-      <button id="copy" class="primary">Copy</button>
-    </footer>
 
     <script type="module" src="popup.js"></script>
   </body>

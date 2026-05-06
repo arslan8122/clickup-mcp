@@ -6,6 +6,15 @@ export interface AuthorizedUser {
   user: { id: number; username: string; email: string };
 }
 
+export interface TeamMember {
+  id: number;
+  username: string;
+  email?: string;
+  initials?: string;
+  color?: string;
+  profilePicture?: string;
+}
+
 export interface SpaceRef {
   id: string;
   name: string;
@@ -68,21 +77,44 @@ export class ClickUpApi {
     return this.request<AuthorizedUser>("/user");
   }
 
-  async getTeams(): Promise<{ teams: Array<{ id: string; name: string }> }> {
-    return this.request<{ teams: Array<{ id: string; name: string }> }>("/team");
+  async getTeams(): Promise<{
+    teams: Array<{
+      id: string;
+      name: string;
+      members?: Array<{ user: TeamMember }>;
+    }>;
+  }> {
+    return this.request("/team");
   }
 
-  // Time entries for one assignee in [startMs, endMs).
+  // Returns workspace members for the configured team, sorted by username.
+  // Uses GET /team (which embeds members) and matches by id, since the
+  // dedicated members endpoint isn't available on every plan.
+  async getTeamMembers(teamId: string): Promise<TeamMember[]> {
+    const { teams } = await this.getTeams();
+    const team = teams.find((t) => t.id === teamId);
+    if (!team || !team.members) return [];
+    const members = team.members
+      .map((m) => m.user)
+      .filter((u): u is TeamMember => !!u && typeof u.id === "number");
+    members.sort((a, b) =>
+      (a.username || "").localeCompare(b.username || "")
+    );
+    return members;
+  }
+
+  // Time entries for one or more assignees in [startMs, endMs).
   async getTimeEntries(
     teamId: string,
     startMs: number,
     endMs: number,
-    assigneeId: number
+    assignees: number | number[]
   ): Promise<TimeEntry[]> {
+    const ids = Array.isArray(assignees) ? assignees : [assignees];
     const qs = new URLSearchParams({
       start_date: String(startMs),
       end_date: String(endMs),
-      assignee: String(assigneeId),
+      assignee: ids.join(","),
     });
     const data = await this.request<{ data: TimeEntry[] }>(
       `/team/${teamId}/time_entries?${qs.toString()}`
@@ -143,6 +175,22 @@ export function dayBoundsLocal(yyyymmdd: string): { startMs: number; endMs: numb
   const start = new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0);
   const end = new Date(y, (m || 1) - 1, (d || 1) + 1, 0, 0, 0, 0);
   return { startMs: start.getTime(), endMs: end.getTime() };
+}
+
+// Local [startDate, endDate] inclusive, in epoch ms. End date rolls to next-day 00:00.
+export function rangeBoundsLocal(
+  startYmd: string,
+  endYmd: string
+): { startMs: number; endMs: number } {
+  const { startMs } = dayBoundsLocal(startYmd);
+  const { endMs } = dayBoundsLocal(endYmd);
+  return { startMs, endMs };
+}
+
+// Number of whole days in [startMs, endMs).
+export function daysInRange(startMs: number, endMs: number): number {
+  if (endMs <= startMs) return 0;
+  return Math.round((endMs - startMs) / 86_400_000);
 }
 
 export function todayLocalIso(): string {

@@ -7,6 +7,7 @@ import {
 } from "../lib/clickup-api.js";
 import { copyDailyUpdate, DoneRow } from "../lib/format.js";
 import { loadConfig } from "../lib/storage.js";
+import { initResourceUtilization } from "./resource-utilization.js";
 
 // One bucket = one folder (or, for tasks not in a folder, one list directly under
 // the space). Keyed by `folder:<id>` or `list:<id>` so they can coexist.
@@ -322,4 +323,23 @@ spaceEl.addEventListener("change", renderTaskRows);
 refreshBtn.addEventListener("click", loadForSelectedDate);
 copyBtn.addEventListener("click", onCopy);
 
+// ===== Tab switching =====
+function setupTabs() {
+  const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+  const panels = document.querySelectorAll<HTMLElement>(".tab-panel");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+      tabs.forEach((t) => t.classList.toggle("active", t === tab));
+      panels.forEach((p) =>
+        p.classList.toggle("active", p.dataset.panel === target)
+      );
+    });
+  });
+}
+
+setupTabs();
 init();
+initResourceUtilization().catch(() => {
+  // initial setup errors surface in the utilization tab's own status area
+});
