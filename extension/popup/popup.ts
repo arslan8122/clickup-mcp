@@ -30,6 +30,7 @@ interface TaskAggregate {
 const dateEl = document.getElementById("date") as HTMLInputElement;
 const spaceEl = document.getElementById("space") as HTMLSelectElement;
 const doneListEl = document.getElementById("done-list") as HTMLUListElement;
+const doneHeadingEl = document.querySelector("#done-block h2") as HTMLHeadingElement;
 const plannedEl = document.getElementById("planned") as HTMLTextAreaElement;
 const aiUsageEl = document.getElementById("ai-usage") as HTMLTextAreaElement;
 const blockersEl = document.getElementById("blockers") as HTMLTextAreaElement;
@@ -50,6 +51,7 @@ function setStatus(text: string, kind: "" | "ok" | "error" = "") {
 
 async function init() {
   dateEl.value = todayLocalIso();
+  updateDoneHeading();
 
   const cfg = await loadConfig();
   if (!cfg.apiKey || !cfg.teamId) {
@@ -124,6 +126,24 @@ async function loadForSelectedDate() {
   spaceEl.value = buckets[0].key;
   renderTaskRows();
   setStatus("");
+}
+
+function doneHeadingForDate(isoDate: string): string {
+  if (!isoDate) return "1. Done Today";
+  if (isoDate === todayLocalIso()) return "1. Done Today";
+
+  const date = new Date(`${isoDate}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "1. Done Today";
+
+  const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "long" }).format(date);
+  const day = new Intl.DateTimeFormat("en-GB", { day: "numeric" }).format(date);
+  const month = new Intl.DateTimeFormat("en-GB", { month: "long" }).format(date);
+  const year = new Intl.DateTimeFormat("en-GB", { year: "numeric" }).format(date);
+  return `1. Done on ${weekday} ${day} ${month} ${year}`;
+}
+
+function updateDoneHeading() {
+  doneHeadingEl.textContent = doneHeadingForDate(dateEl.value);
 }
 
 // Group entries by folder when one exists; otherwise fall back to the list itself
@@ -261,6 +281,7 @@ async function onCopy() {
   try {
     await copyDailyUpdate({
       doneToday,
+      doneHeading: doneHeadingForDate(dateEl.value),
       plannedTomorrow: planned,
       aiUsage: aiUsageEl.value.trim(),
       blockers: blockersEl.value.trim() || "None at the moment.",
@@ -294,6 +315,7 @@ function messageFor(e: unknown): string {
 }
 
 dateEl.addEventListener("change", () => {
+  updateDoneHeading();
   loadForSelectedDate();
 });
 spaceEl.addEventListener("change", renderTaskRows);

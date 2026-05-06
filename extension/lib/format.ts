@@ -15,6 +15,7 @@ export interface DoneRow {
 
 export interface DailyUpdate {
   doneToday: DoneRow[];
+  doneHeading?: string;
   plannedTomorrow: string[];
   aiUsage: string;
   blockers: string;
@@ -48,6 +49,7 @@ function formatMsLocal(ms: number): string {
 // We do NOT use the task name as anchor text, because ClickUp Chat keeps the
 // anchor text and skips the auto-render in that case.
 export function buildHtml(update: DailyUpdate): string {
+  const doneHeading = update.doneHeading || "1. Done Today";
   const doneItems = update.doneToday.length
     ? update.doneToday
         .map((r) => {
@@ -65,7 +67,7 @@ export function buildHtml(update: DailyUpdate): string {
     : "";
 
   return [
-    `<p><b>1. Done Today</b></p>`,
+    `<p><b>${escapeHtml(doneHeading)}</b></p>`,
     doneItems ? `<ul>${doneItems}</ul>` : "",
     `<p><b>2. Planned for Tomorrow</b></p>`,
     plannedItems ? `<ul>${plannedItems}</ul>` : "",
@@ -77,6 +79,7 @@ export function buildHtml(update: DailyUpdate): string {
 }
 
 export function buildMarkdown(update: DailyUpdate): string {
+  const doneHeading = update.doneHeading || "1. Done Today";
   const doneLines = update.doneToday
     .map((r) => {
       const status = (r.status || "").toUpperCase() || "DONE";
@@ -87,7 +90,7 @@ export function buildMarkdown(update: DailyUpdate): string {
   const plannedLines = update.plannedTomorrow.map((s) => `• ${s}`).join("\n");
 
   return [
-    `**1. Done Today**`,
+    `**${doneHeading}**`,
     doneLines || "—",
     ``,
     `**2. Planned for Tomorrow**`,
